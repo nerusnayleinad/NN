@@ -65,3 +65,29 @@ stages:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
         artifactName: 'docker-image-$(ecr_repo)'
+        
+- stage: Push
+  displayName: 'Push to ECR'
+  dependsOn: Build
+  jobs:
+  - job: PushJob
+    steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading Image Artifact'
+      inputs:
+        artifactName: 'docker-image-$(ecr_repo)'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - script: |
+        docker load -i $(Pipeline.Workspace)/$(ecr_repo).tar
+      displayName: 'Loading Docker Image'
+
+    - task: Docker@2
+      displayName: 'Push to ECR'
+      inputs:
+        command: push
+        containerRegistry: $(ecr_conn)
+        repository: $(ecr_repo)
+        tags: |
+          latest
+          $(Build.BuildId)
