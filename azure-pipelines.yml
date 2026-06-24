@@ -32,6 +32,7 @@ stages:
           
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
+        docker inspect --format='{{index .RepoDigests 0}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | cut -d'@' -f2 > digest.txt
       displayName: 'Saving Docker Image'
 
     - task: PublishPipelineArtifact@1
@@ -39,6 +40,12 @@ stages:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
         artifactName: 'docker-image-$(ecr_repo)'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publishing Docker Image Digest as Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/digest.txt'
+        artifactName: 'docker-image-digest-$(ecr_repo)'
           
 - stage: Scan
   displayName: 'Scanning Docker Image'
@@ -113,6 +120,16 @@ stages:
   jobs:
   - job: Sign
     steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading Image Digest Artifact'
+      inputs:
+        artifactName: 'docker-image-digest-$(ecr_repo)'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - script: |
+        digest=`<$(Pipeline.Workspace)/digest.txt`
+      displayName: 'Getting the Digest of the Image'
+      
     - task: Docker@2
       displayName: 'Login to ECR'
       inputs:
@@ -125,5 +142,5 @@ stages:
         command: 'run'
         arguments: |
           -v /var/run/docker.sock:/var/run/docker.sock
-          $(cosign) sign $(ecr)/$(ecr_repo):$(Build.BuildId)
+          $(cosign) sign $(ecr)/$(ecr_repo):$(digest)
         
