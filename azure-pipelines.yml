@@ -11,10 +11,10 @@ variables:
   trivy: 'aquasec/trivy:0.71.2'
       
 stages:
-- stage: BuildAndScan
+- stage: Build
   displayName: 'Build and Scan'
   jobs:
-  - job: BuildAndScanImage
+  - job: Build
     displayName: 'Build and Scan Docker Image'
     pool:
       vmImage: 'ubuntu-latest'
@@ -28,33 +28,7 @@ stages:
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           $(Build.BuildId)
-
-    - task: Docker@2
-      condition: succeeded()
-      displayName: 'Scanning Docker Image OS'
-      inputs:
-        command: 'run'
-        arguments: |
-          -v /var/run/docker.sock:/var/run/docker.sock
-          $(trivy) image $(ecr)/$(ecr_repo):$(Build.BuildId)
-          --severity CRITICAL
-          --exit-code 1
-      continueOnError: false
-
-    - task: Docker@2
-      condition: succeeded()
-      displayName: 'Scanning Docker Image Application Dependencies'
-      enabled: false
-      inputs:
-        command: 'run'
-        arguments: |
-          -v $(Build.SourcesDirectory):/src
-          -v /var/run/docker.sock:/var/run/docker.sock
-          $(trivy) fs /src
-          --severity CRITICAL
-          --exit-code 1
-      continueOnError: false
-      
+          
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
       displayName: 'Saving Docker Image'
@@ -64,12 +38,12 @@ stages:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
         artifactName: 'docker-image-$(ecr_repo)'
-        
-- stage: Push
-  displayName: 'Push to ECR'
-  dependsOn: BuildAndScan
+          
+- stage: Scan
+  displayName: 'Scanning Docker Image'
+  dependsOn: Build
   jobs:
-  - job: PushJob
+  - job: Scan
     steps:
     - task: DownloadPipelineArtifact@1
       displayName: 'Downloading Image Artifact'
@@ -82,10 +56,52 @@ stages:
       displayName: 'Loading Docker Image'
 
     - task: Docker@2
-      displayName: 'Push to ECR'
+      displayName: 'Scanning Docker Image OS'
+      inputs:
+        command: 'run'
+        arguments: |
+          -v /var/run/docker.sock:/var/run/docker.sock
+          $(trivy) image $(ecr)/$(ecr_repo):$(Build.BuildId)
+          --severity CRITICAL
+          --exit-code 1
+      continueOnError: false
+
+    - task: Docker@2
+      displayName: 'Scanning Docker Image Application Dependencies'
+      enabled: false
+      inputs:
+        command: 'run'
+        arguments: |
+          -v $(Build.SourcesDirectory):/src
+          -v /var/run/docker.sock:/var/run/docker.sock
+          $(trivy) fs /src
+          --severity CRITICAL
+          --exit-code 1
+      continueOnError: false       
+          
+- stage: Push
+  displayName: 'Pushing Docker Image'
+  dependsOn: Scan
+  jobs:
+  - job: Push
+    steps:
+    - task: DownloadPipelineArtifact@1
+      displayName: 'Downloading Image Artifact'
+      inputs:
+        artifactName: 'docker-image-$(ecr_repo)'
+        targetPath: '$(Pipeline.Workspace)'
+
+    - script: |
+        docker load -i $(Pipeline.Workspace)/$(ecr_repo).tar
+        docker tag $(ecr)/$(ecr_repo):$(Build.BuildId) $(ecr)/$(ecr_repo):latest
+      displayName: 'Loading Docker Image, and Tagging with "latest"'
+
+    - task: Docker@2
+      displayName: 'Pushing Docker Image to ECR'
       inputs:
         command: push
         containerRegistry: $(ecr_conn)
         repository: $(ecr_repo)
         tags: |
+          latest
           $(Build.BuildId)
