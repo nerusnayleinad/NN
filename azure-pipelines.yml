@@ -128,6 +128,7 @@ stages:
 
     - script: |
         digest=`<$(Pipeline.Workspace)/digest.txt`
+        echo $(digest)
         echo "##vso[task.setvariable variable=digest]$digest"
       displayName: 'Getting the Digest of the Image'
       
@@ -136,10 +137,6 @@ stages:
       inputs:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
-        
-    - script: |
-        echo $(digest)
-      displayName: 'Testing'
         
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
