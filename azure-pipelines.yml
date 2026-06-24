@@ -54,7 +54,7 @@ stages:
         command: 'run'
         arguments: |
           -v $(Build.SourcesDirectory):/src
-          -v ~/.m2:~/.m2
+          -v /root/.m2:/root/.m2
           -v /var/run/docker.sock:/var/run/docker.sock
           $(trivy) fs /src
           --severity CRITICAL
