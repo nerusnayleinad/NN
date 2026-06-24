@@ -31,6 +31,7 @@ stages:
           $(Build.BuildId)
 
     - task: Docker@2
+      condition: succeeded()
       displayName: 'Scanning Docker Image'
       inputs:
         command: 'run'
@@ -39,3 +40,4 @@ stages:
           $(trivy) image $(ecr)/$(ecr_repo):$(Build.BuildId)
           --severity CRITICAL
           --exit-code 1
+      continueOnError: false
