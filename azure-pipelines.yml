@@ -68,7 +68,7 @@ stages:
         
 - stage: Push
   displayName: 'Push to ECR'
-  dependsOn: Build
+  dependsOn: BuildAndScan
   jobs:
   - job: PushJob
     steps:
