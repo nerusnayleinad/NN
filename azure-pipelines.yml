@@ -14,3 +14,15 @@ steps:
     tags: |
       latest
       $(Build.BuildId)
+      
+- task: Docker@2
+  displayName: 'Scan with Trivy'
+  inputs:
+    command: 'run'
+    imageName: 'aquasec/trivy:0.71.2'
+    volumes: |
+      /var/run/docker.sock:/var/run/docker.sock
+    commandArgs: |
+      image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
+      --severity CRITICAL
+      --exit-code 1
