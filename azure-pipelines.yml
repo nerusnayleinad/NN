@@ -39,6 +39,6 @@ stages:
           -v /var/run/docker.sock:/var/run/docker.sock
           $(trivy) image $(ecr)/$(ecr_repo):$(Build.BuildId)
           --severity CRITICAL
-          --pkg-types os library
+          --pkg-types os
           --exit-code 1
       continueOnError: false
