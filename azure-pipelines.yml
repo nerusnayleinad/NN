@@ -19,6 +19,7 @@ steps:
   displayName: 'Scan with Trivy'
   inputs:
     command: 'run'
+    containerRegistry: ''  
     imageName: 'aquasec/trivy:0.71.2'
     volumes: |
       /var/run/docker.sock:/var/run/docker.sock
