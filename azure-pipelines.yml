@@ -128,6 +128,7 @@ stages:
 
     - script: |
         digest=`<$(Pipeline.Workspace)/digest.txt`
+        echo "##vso[task.setvariable variable=digest]$digest"
       displayName: 'Getting the Digest of the Image'
       
     - task: Docker@2
