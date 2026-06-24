@@ -32,7 +32,7 @@ stages:
           
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
-        docker inspect --format='{{index .RepoDigests 0}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | cut -d'@' -f2 | tee $(Build.ArtifactStagingDirectory)/digest.txt
+        docker inspect --format='{{json .RepoDigests}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | cut -d'@' -f2 | tee $(Build.ArtifactStagingDirectory)/digest.txt
       displayName: 'Saving Docker Image'
 
     - task: PublishPipelineArtifact@1
