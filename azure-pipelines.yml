@@ -25,7 +25,7 @@ stages:
         containerRegistry: $(ecr_conn)
         repository: 'nn'
         command: 'build'
-        Dockerfile: $(Build.SourcesDirectory)
+        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
           latest
           $(Build.BuildId)
