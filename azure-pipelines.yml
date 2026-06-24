@@ -42,6 +42,10 @@ stages:
           --exit-code 1
       continueOnError: false
 
+    - script: |
+        mvn dependency:resolve
+      displayName: 'Resolve Maven Dependencies'
+
     - task: Docker@2
       condition: succeeded()
       displayName: 'Scanning Docker Image Application Dependencies'
@@ -49,6 +53,7 @@ stages:
         command: 'run'
         arguments: |
           -v $(Build.SourcesDirectory):/src
+          -v ~/.m2:/root/.m2
           -v /var/run/docker.sock:/var/run/docker.sock
           $(trivy) fs /src
           --severity CRITICAL
