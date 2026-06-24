@@ -7,7 +7,7 @@ pool:
 steps:
 - task: Docker@2
   inputs:
-    containerRegistry: 'azure_devops_to_ecr'
+    containerRegistry: 'azure_devops_to_ecr_docker_conn'
     repository: 'nn'
     command: 'build'
     Dockerfile: '**/Dockerfile'
