@@ -137,11 +137,15 @@ stages:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
         
+    - script: |
+        echo $(digest)
+      displayName: 'Testing'
+        
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
       inputs:
         command: 'run'
         arguments: |
           -v /var/run/docker.sock:/var/run/docker.sock
-          $(cosign) sign $(ecr)/$(ecr_repo):$(digest)
+          $(cosign) sign $(ecr)/$(ecr_repo)@$(digest)
         
