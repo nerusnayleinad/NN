@@ -3,11 +3,17 @@ trigger:
 
 pool:
   vmImage: 'ubuntu-latest'
+  
+variables:
+  ecr: '881986476278.dkr.ecr.us-east-2.amazonaws.com'
+  ecr_repo: 'nn'
+  ecr_conn: 'azure_devops_to_ecr_docker_conn'
+  trivy: 'aquasec/trivy:0.71.2'
 
 steps:
 - task: Docker@2
   inputs:
-    containerRegistry: 'azure_devops_to_ecr_docker_conn'
+    containerRegistry: ${ecr_conn}
     repository: 'nn'
     command: 'build'
     Dockerfile: '**/Dockerfile'
@@ -19,12 +25,8 @@ steps:
   displayName: 'Scan with Trivy'
   inputs:
     command: 'run'
-    containerRegistry: ''  
-    repository: 'aquasec/trivy:0.71.2'
-    volumes: |
-      /var/run/docker.sock:/var/run/docker.sock
     arguments: |
       -v /var/run/docker.sock:/var/run/docker.sock
-      aquasec/trivy:0.71.2 image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
+      ${trivy} image ${ecr}/${ecr_repo}:$(Build.BuildId)
       --severity CRITICAL
       --exit-code 1
