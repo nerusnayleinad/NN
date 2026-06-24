@@ -7,7 +7,7 @@ pool:
 steps:
 - task: Docker@2
   inputs:
-    containerRegistry: '881986476278.dkr.ecr.us-east-2.amazonaws.com'
+    containerRegistry: 'azure_devops_to_ecr'
     repository: 'nn'
     command: 'build'
     Dockerfile: '**/Dockerfile'
