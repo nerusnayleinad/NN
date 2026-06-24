@@ -127,7 +127,7 @@ stages:
         targetPath: '$(Pipeline.Workspace)'
 
     - script: |
-        digest=$(<$(Pipeline.Workspace)/digest.txt)
+        digest=$(cat $(Pipeline.Workspace)/digest.txt)
         echo $(digest)
         echo "##vso[task.setvariable variable=digest]$digest"
       displayName: 'Getting the Digest of the Image'
