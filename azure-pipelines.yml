@@ -50,7 +50,7 @@ stages:
         arguments: |
           -v $(Build.SourcesDirectory):/src
           -v /var/run/docker.sock:/var/run/docker.sock
-          $(trivy) fs /code/src
+          $(trivy) fs /src
           --severity CRITICAL
           --exit-code 1
       continueOnError: false
