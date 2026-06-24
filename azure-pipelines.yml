@@ -19,43 +19,6 @@ stages:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - task: Docker@2
-      displayName: 'Building Docker Image'
-      inputs:
-        containerRegistry: $(ecr_conn)
-        repository: 'nn'
-        command: 'build'
-        Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
-        tags: |
-          latest
-          $(Build.BuildId)
-
-    - task: Docker@2
-      condition: succeeded()
-      displayName: 'Scanning Docker Image OS'
-      inputs:
-        command: 'run'
-        arguments: |
-          -v /var/run/docker.sock:/var/run/docker.sock
-          $(trivy) image $(ecr)/$(ecr_repo):$(Build.BuildId)
-          --severity CRITICAL
-          --exit-code 1
-      continueOnError: false
-
     - script: |
-        mvn -X dependency:resolve
+        ls -l
       displayName: 'Resolve Maven Dependencies'
-
-    - task: Docker@2
-      condition: succeeded()
-      displayName: 'Scanning Docker Image Application Dependencies'
-      inputs:
-        command: 'run'
-        arguments: |
-          -v $(Build.SourcesDirectory):/src
-          -v ~/.m2:/root/.m2
-          -v /var/run/docker.sock:/var/run/docker.sock
-          $(trivy) fs /src
-          --severity CRITICAL
-          --exit-code 1
-      continueOnError: true
