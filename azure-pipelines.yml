@@ -43,7 +43,7 @@ stages:
       continueOnError: false
 
     - script: |
-        mvn dependency:resolve
+        mvn -X dependency:resolve
       displayName: 'Resolve Maven Dependencies'
 
     - task: Docker@2
