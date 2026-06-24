@@ -24,6 +24,6 @@ steps:
     volumes: |
       /var/run/docker.sock:/var/run/docker.sock
     arguments: |
-      ${imageName} image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
+      aquasec/trivy:0.71.2 image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
       --severity CRITICAL
       --exit-code 1
