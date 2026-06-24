@@ -136,6 +136,10 @@ stages:
       inputs:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
+    
+    - script: |
+        docker pull $(ecr)/$(ecr_repo)@$(digest)
+      displayName: Test ECR Access
         
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
