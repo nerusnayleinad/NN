@@ -16,7 +16,7 @@ steps:
     containerRegistry: $(ecr_conn)
     repository: 'nn'
     command: 'build'
-    Dockerfile: '**/Dockerfile'
+    Dockerfile: $(Build.SourcesDirectory)
     tags: |
       latest
       $(Build.BuildId)
