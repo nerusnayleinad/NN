@@ -27,7 +27,6 @@ stages:
         command: 'build'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
-          latest
           $(Build.BuildId)
 
     - task: Docker@2
@@ -89,5 +88,4 @@ stages:
         containerRegistry: $(ecr_conn)
         repository: $(ecr_repo)
         tags: |
-          latest
           $(Build.BuildId)
