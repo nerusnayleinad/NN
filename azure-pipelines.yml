@@ -20,11 +20,10 @@ steps:
   inputs:
     command: 'run'
     containerRegistry: ''  
-    imageName: 'aquasec/trivy:0.71.2'
+    repository: 'aquasec/trivy:0.71.2'
     volumes: |
       /var/run/docker.sock:/var/run/docker.sock
-      /var/run/containerd/containerd.sock:/var/run/containerd/containerd.sock
     arguments: |
-      aquasec/trivy:0.71.2 image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
+      image 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:$(Build.BuildId)
       --severity CRITICAL
       --exit-code 1
