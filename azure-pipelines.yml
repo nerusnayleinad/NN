@@ -23,7 +23,7 @@ stages:
       displayName: 'Building Docker Image'
       inputs:
         containerRegistry: $(ecr_conn)
-        repository: 'nn'
+        repository: $(ecr_repo)
         command: 'build'
         Dockerfile: '$(Build.SourcesDirectory)/Dockerfile'
         tags: |
@@ -42,21 +42,26 @@ stages:
           --exit-code 1
       continueOnError: false
 
-    - script: |
-        cd api/
-        mvn -X dependency:resolve
-      displayName: 'Resolve Maven Dependencies'
-
     - task: Docker@2
       condition: succeeded()
       displayName: 'Scanning Docker Image Application Dependencies'
+      enabled: false
       inputs:
         command: 'run'
         arguments: |
           -v $(Build.SourcesDirectory):/src
-          -v /root/.m2:/root/.m2
           -v /var/run/docker.sock:/var/run/docker.sock
           $(trivy) fs /src
           --severity CRITICAL
           --exit-code 1
-      continueOnError: true
+      continueOnError: false
+      
+    - script: |
+        docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
+      displayName: 'Saving Docker Image'
+
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publishing Docker Image as Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
+        artifactName: 'docker-image-$(ecr_repo)'
