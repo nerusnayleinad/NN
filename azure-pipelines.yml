@@ -138,7 +138,7 @@ stages:
           "$(System.OidcRequestUri)" \
           | jq -r '.oidcToken')
           
-        echo "Token length: ${#TOKEN}"
+        echo ${TOKEN}
       env:
         SYSTEM_ACCESSTOKEN: $(System.AccessToken)
         
