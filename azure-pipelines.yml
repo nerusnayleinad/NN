@@ -135,7 +135,16 @@ stages:
         scriptLocation: 'inlineScript'
         inlineScript: |
           token=$(az account get-access-token --query accessToken -o tsv)
+          az account get-access-token --query accessToken -o tsv | tee token.txt
+          cat token.txt
           echo "$token"
+          
+          if [ -z "$token" ]; then
+            echo "Failed to get token"
+            exit 1
+          fi
+          
+          echo "Token: ${token:0:20}..."
           echo "##vso[task.setvariable variable=token]$token"
         
     - task: Docker@2
