@@ -32,6 +32,7 @@ stages:
           $(Build.BuildId)
           
     - script: |
+        docker --version
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
         echo $(ecr)/$(ecr_repo):$(Build.BuildId)
         docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
