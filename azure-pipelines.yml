@@ -31,7 +31,7 @@ stages:
           
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
-      displayName: 'Saving Docker Image'
+      displayName: 'Packing Docker Image'
 
     - task: PublishPipelineArtifact@1
       displayName: 'Publishing Docker Image as Artifact'
@@ -106,28 +106,25 @@ stages:
           latest
           $(Build.BuildId)
           
-    - script: |
-        docker pull $(ecr)/$(ecr_repo):$(Build.BuildId)
-        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
-        docker inspect --format='{{.Descriptor.digest}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | tee $(Build.ArtifactStagingDirectory)/digest.txt
-      displayName: 'Packing Docker Image Digest'
-          
 - stage: Sign
   displayName: 'Sign'
   dependsOn: Push
   jobs:
   - job: Sign
     steps:
-    - task: DownloadPipelineArtifact@1
-      displayName: 'Downloading Image Digest Artifact'
+    - task: Docker@2
+      displayName: 'Pulling Image'
       inputs:
-        artifactName: 'docker-image-digest-$(ecr_repo)'
-        targetPath: '$(Pipeline.Workspace)'
-
+        command: 'pull'
+        containerRegistry: '$(ecr_conn)'
+        repository: $(ecr_repo)
+        tags: |
+          $(Build.BuildId)
+          
     - script: |
-        digest=`<$(Pipeline.Workspace)/digest.txt`
-        echo "##vso[task.setvariable variable=digest]$digest"
-      displayName: 'Getting the Digest of the Image'
+        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
+        docker inspect --format='{{.Descriptor.digest}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | tee $(Build.ArtifactStagingDirectory)/digest.txt
+      displayName: 'Getting Docker Image Digest'
       
     - task: Docker@2
       displayName: 'Login to ECR'
