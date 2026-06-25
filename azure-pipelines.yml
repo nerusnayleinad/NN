@@ -5,6 +5,7 @@ pool:
   vmImage: 'ubuntu-latest'
   
 variables:
+  system.debug: true
   ecr: '881986476278.dkr.ecr.us-east-2.amazonaws.com'
   ecr_repo: 'nn'
   ecr_conn: 'azure_devops_to_ecr_docker_conn'
