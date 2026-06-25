@@ -149,6 +149,4 @@ stages:
         arguments: |
           -v /var/run/docker.sock:/var/run/docker.sock
           $(cosign) sign $(ecr)/$(ecr_repo)@$(digest)
-        env:
-          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
         
