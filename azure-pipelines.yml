@@ -14,12 +14,10 @@ variables:
       
 stages:
 - stage: Build
-  displayName: 'Build and Scan'
+  displayName: 'Build'
   jobs:
   - job: Build
-    displayName: 'Build and Scan Docker Image'
-    pool:
-      vmImage: 'ubuntu-latest'
+    displayName: 'Build'
     steps:
     - task: Docker@2
       displayName: 'Building Docker Image'
@@ -32,14 +30,7 @@ stages:
           $(Build.BuildId)
           
     - script: |
-        docker --version
-        docker buildx version
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
-        echo $(ecr)/$(ecr_repo):$(Build.BuildId)
-        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
-        docker build -t $(ecr)/$(ecr_repo):$(Build.BuildId) -f '$(Build.SourcesDirectory)/Dockerfile' $(Build.SourcesDirectory)
-        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
-        docker inspect --format='{{.Descriptor.digest}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | tee $(Build.ArtifactStagingDirectory)/digest.txt
       displayName: 'Saving Docker Image'
 
     - task: PublishPipelineArtifact@1
@@ -48,14 +39,8 @@ stages:
         targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
         artifactName: 'docker-image-$(ecr_repo)'
 
-    - task: PublishPipelineArtifact@1
-      displayName: 'Publishing Docker Image Digest as Artifact'
-      inputs:
-        targetPath: '$(Build.ArtifactStagingDirectory)/digest.txt'
-        artifactName: 'docker-image-digest-$(ecr_repo)'
-          
 - stage: Scan
-  displayName: 'Scanning Docker Image'
+  displayName: 'Scan'
   dependsOn: Build
   jobs:
   - job: Scan
@@ -95,7 +80,7 @@ stages:
       continueOnError: false       
           
 - stage: Push
-  displayName: 'Pushing Docker Image'
+  displayName: 'Push'
   dependsOn: Scan
   jobs:
   - job: Push
@@ -121,8 +106,13 @@ stages:
           latest
           $(Build.BuildId)
           
+    - script: |
+        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
+        docker inspect --format='{{.Descriptor.digest}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | tee $(Build.ArtifactStagingDirectory)/digest.txt
+      displayName: 'Saving Docker Image'
+          
 - stage: Sign
-  displayName: 'Signing Docker Image'
+  displayName: 'Sign'
   dependsOn: Push
   jobs:
   - job: Sign
@@ -143,10 +133,6 @@ stages:
       inputs:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
-    
-    - script: |
-        docker pull $(ecr)/$(ecr_repo)@$(digest)
-      displayName: Test ECR Access
         
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
