@@ -107,9 +107,10 @@ stages:
           $(Build.BuildId)
           
     - script: |
+        docker pull $(ecr)/$(ecr_repo):$(Build.BuildId)
         docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
         docker inspect --format='{{.Descriptor.digest}}' $(ecr)/$(ecr_repo):$(Build.BuildId) | tee $(Build.ArtifactStagingDirectory)/digest.txt
-      displayName: 'Saving Docker Image'
+      displayName: 'Packing Docker Image Digest'
           
 - stage: Sign
   displayName: 'Sign'
