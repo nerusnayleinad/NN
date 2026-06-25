@@ -19,6 +19,19 @@ stages:
   - job: Build
     displayName: 'Build'
     steps:
+    
+    - task: AzureCLI@2
+      displayName: 'Check OIDC Token'
+      inputs:
+        azureSubscription: 'azure_oidc'
+        addSpnToEnvironment: true
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # Get a fresh token
+          freshToken=$(az account get-access-token --query accessToken -o tsv)
+          echo "Fresh token obtained: ${freshToken)"
+          
     - task: Docker@2
       displayName: 'Building Docker Image'
       inputs:
@@ -131,16 +144,6 @@ stages:
       inputs:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
-        
-    - bash: |
-        TOKEN=$(curl -sS \
-          -H "Authorization: Bearer $(System.AccessToken)" \
-          "$(System.OidcRequestUri)" \
-          | jq -r '.oidcToken')
-          
-        echo ${TOKEN}
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
         
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
