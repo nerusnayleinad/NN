@@ -31,6 +31,7 @@ stages:
           
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
+        docker inspect $(ecr)/$(ecr_repo):$(Build.BuildId)
       displayName: 'Packing Docker Image'
 
     - task: PublishPipelineArtifact@1
