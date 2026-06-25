@@ -28,9 +28,15 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Get a fresh token
+          # Get fresh token
           freshToken=$(az account get-access-token --query accessToken -o tsv)
-          echo "Fresh token obtained: ${freshToken)"
+          
+          if [ -z "$freshToken" ]; then
+            echo "Failed to get token"
+            exit 1
+          fi
+          
+          echo "Token obtained: ${freshToken:0:20}..."
           
     - task: Docker@2
       displayName: 'Building Docker Image'
