@@ -132,6 +132,16 @@ stages:
         command: 'login'
         containerRegistry: '$(ecr_conn)'
         
+    - bash: |
+        TOKEN=$(curl -sS \
+          -H "Authorization: Bearer $(System.AccessToken)" \
+          "$(System.OidcRequestUri)" \
+          | jq -r '.oidcToken')
+          
+        echo "Token length: ${#TOKEN}"
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+        
     - task: Docker@2
       displayName: 'Signing Docker Image with Cosign'
       inputs:
@@ -139,4 +149,6 @@ stages:
         arguments: |
           -v /var/run/docker.sock:/var/run/docker.sock
           $(cosign) sign $(ecr)/$(ecr_repo)@$(digest)
+        env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
         
