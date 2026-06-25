@@ -11,7 +11,7 @@ variables:
   ecr_conn: 'azure_devops_to_ecr_docker_conn'
   trivy: 'aquasec/trivy:0.71.2'
   cosign: 'ghcr.io/sigstore/cosign/cosign:latest'
-
+- group: dev
       
 stages:
 - stage: Build
