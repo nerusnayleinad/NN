@@ -36,7 +36,7 @@ stages:
         digest=`docker inspect --format='{{with index .RepoDigests 0}}{{index (split . "@") 1}}{{end}}' $(ecr)/$(ecr_repo):110`
         echo "##vso[task.setvariable variable=digest]$digest"
         
-        printf "%s\n" "$(cosign.key)" > $(System. DefaultWorkingDirectory)/cosign.key
+        printf "%s\n" "$(cosign.key)" > $(System.DefaultWorkingDirectory)/cosign.key
       displayName: 'Getting Docker Image Digest'
 
 
@@ -47,5 +47,5 @@ stages:
         arguments: |
           -v /var/run/docker.sock:/var/run/docker.sock
           $(cosign) sign
-          --key $(System. DefaultWorkingDirectory)/cosign.key
+          --key $(System.DefaultWorkingDirectory)/cosign.key
           $(ecr)/$(ecr_repo)@$(digest)
