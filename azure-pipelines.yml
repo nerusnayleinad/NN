@@ -53,4 +53,4 @@ stages:
     
           aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
     
-          cosign sign --key $(System.DefaultWorkingDirectory)/cosign.key $(ecr)/$(ecr_repo)@$(digest)
+          COSIGN_PASSWORD='' cosign sign --key $(System.DefaultWorkingDirectory)/cosign.key $(ecr)/$(ecr_repo)@$(digest)
