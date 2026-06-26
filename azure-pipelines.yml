@@ -136,16 +136,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          # Request a token with the "sigstore" audience
-          # The audience is set via the --resource parameter.
-          token=$(az account get-access-token --resource api://b3789fb0-a274-4f8b-9fc3-346f9ccdfd94 --query accessToken -o tsv)
-    
-          if [ -z "$token" ]; then
-            echo "Failed to get token for sigstore audience"
-            exit 1
-          fi
-    
-          # Set the token as a pipeline variable for later steps
+          token=$(az account get-access-token --query accessToken -o tsv)
           echo "##vso[task.setvariable variable=token]$token"
         
     - task: AWSShellScript@1
