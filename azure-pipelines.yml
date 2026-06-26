@@ -39,13 +39,18 @@ stages:
         printf "%s\n" "$(cosign.key)" > $(System.DefaultWorkingDirectory)/cosign.key
       displayName: 'Getting Docker Image Digest'
 
-
-    - task: Docker@2
-      displayName: 'Signing Docker Image with Cosign'
+          
+    - task: AWSShellScript@1
+      displayName: 'Run AWS CLI Commands'
       inputs:
-        command: 'run'
-        arguments: |
-          -v /var/run/docker.sock:/var/run/docker.sock
-          $(cosign) sign
-          --key $(System.DefaultWorkingDirectory)/cosign.key
-          $(ecr)/$(ecr_repo)@$(digest)
+        awsCredentials: 'azure_devops_to_ecr'  
+        regionName: 'us-east-2'
+        scriptType: 'inline'
+        inlineScript: |
+          curl -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" -o cosign
+          chmod +x cosign
+          mv cosign /usr/local/bin/cosign
+    
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
+    
+          cosign sign --key $(System.DefaultWorkingDirectory)/cosign.key $(ecr)/$(ecr_repo)@$(digest)
