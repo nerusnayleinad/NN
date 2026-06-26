@@ -127,31 +127,21 @@ stages:
         digest=`docker inspect --format='{{with index .RepoDigests 0}}{{index (split . "@") 1}}{{end}}' $(ecr)/$(ecr_repo):$(Build.BuildId)`
         echo "##vso[task.setvariable variable=digest]$digest"
       displayName: 'Getting Docker Image Digest'
+
+
+- task: AzureCLI@2
+  displayName: 'Sign with Cosign'
+  inputs:
+    azureSubscription: 'azure_oidc'
+    addSpnToEnvironment: true
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      # The OIDC token is injected via AZURE_FEDERATED_TOKEN_FILE
+      export SIGSTORE_ID_TOKEN=$(cat "$AZURE_FEDERATED_TOKEN_FILE")
       
-    - task: AzureCLI@2
-      displayName: 'Get Sigstore OIDC Token'
-      inputs:
-        azureSubscription: 'azure_oidc'  
-        addSpnToEnvironment: true                      
-        scriptType: 'bash'
-        scriptLocation: 'inlineScript'
-        inlineScript: |
-          token=$(az account get-access-token --query accessToken -o tsv)
-          echo "##vso[task.setvariable variable=token]$token"
-        
-    - task: AWSShellScript@1
-      displayName: 'Run AWS CLI Commands'
-      inputs:
-        awsCredentials: 'azure_devops_to_ecr'  
-        regionName: 'us-east-2'
-        scriptType: 'inline'
-        inlineScript: |
-          curl -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" -o cosign
-          chmod +x cosign
-          mv cosign /usr/local/bin/cosign
-    
-          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
-    
-          export COSIGN_IDENTITY_TOKEN=$(token)
-          cosign sign --identity-token $COSIGN_IDENTITY_TOKEN $(ecr)/$(ecr_repo)@$(digest)
-        
+      # AWS login
+      aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
+      
+      # Sign - no deprecated flags
+      cosign sign --yes $(ecr)/$(ecr_repo)@$(digest)
