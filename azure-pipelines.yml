@@ -152,7 +152,7 @@ stages:
     - task: AWSShellScript@1
       displayName: 'Run AWS CLI Commands'
       inputs:
-        awsCredentials: 'azure_devops_to_ecr'  
+        awsCredentials: $(ecr_conn) 
         regionName: 'us-east-2'
         scriptType: 'inline'
         inlineScript: |
