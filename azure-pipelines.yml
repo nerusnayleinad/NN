@@ -68,7 +68,7 @@ stages:
 
     - task: Docker@2
       displayName: 'Scanning Docker Image Application Dependencies'
-      enabled: false
+      enabled: true
       inputs:
         command: 'run'
         arguments: |
