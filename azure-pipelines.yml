@@ -136,7 +136,7 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          token=$(az account get-access-token --subscription 35932191-57b0-4d9e-8c51-0842cd5bc1b9 --query accessToken -o tsv)
+          token=$(az account get-access-token --resource api://b3789fb0-a274-4f8b-9fc3-346f9ccdfd94 --query accessToken -o tsv)
           echo "##vso[task.setvariable variable=token]$token"
         
     - task: AWSShellScript@1
