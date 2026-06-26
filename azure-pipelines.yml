@@ -131,12 +131,12 @@ stages:
     - task: AzureCLI@2
       displayName: 'Get Sigstore OIDC Token'
       inputs:
-        azureSubscription: 'azure_oidc'  # Your Azure Resource Manager connection
-        addSpnToEnvironment: true                            # Injects $idToken
+        azureSubscription: 'azure_oidc'  
+        addSpnToEnvironment: true                      
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          token=$(az account get-access-token --query accessToken -o tsv)
+          token=$(az account get-access-token --subscription 35932191-57b0-4d9e-8c51-0842cd5bc1b9 --query accessToken -o tsv)
           echo "##vso[task.setvariable variable=token]$token"
         
     - task: AWSShellScript@1
