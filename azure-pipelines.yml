@@ -129,19 +129,19 @@ stages:
       displayName: 'Getting Docker Image Digest'
 
 
-- task: AzureCLI@2
-  displayName: 'Sign with Cosign'
-  inputs:
-    azureSubscription: 'azure_oidc'
-    addSpnToEnvironment: true
-    scriptType: 'bash'
-    scriptLocation: 'inlineScript'
-    inlineScript: |
-      # The OIDC token is injected via AZURE_FEDERATED_TOKEN_FILE
-      export SIGSTORE_ID_TOKEN=$(cat "$AZURE_FEDERATED_TOKEN_FILE")
-      
-      # AWS login
-      aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
-      
-      # Sign - no deprecated flags
-      cosign sign --yes $(ecr)/$(ecr_repo)@$(digest)
+    - task: AzureCLI@2
+      displayName: 'Sign with Cosign'
+      inputs:
+        azureSubscription: 'azure_oidc'
+        addSpnToEnvironment: true
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          # The OIDC token is injected via AZURE_FEDERATED_TOKEN_FILE
+          export SIGSTORE_ID_TOKEN=$(cat "$AZURE_FEDERATED_TOKEN_FILE")
+          
+          # AWS login
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
+          
+          # Sign - no deprecated flags
+          cosign sign --yes $(ecr)/$(ecr_repo)@$(digest)
