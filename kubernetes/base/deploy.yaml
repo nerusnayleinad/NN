@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy
+  labels:
+    app: nn
+spec:
+  selector:
+    matchLabels:
+      app: nn
+  template:
+    metadata:
+      labels:
+        app: nn
+    spec:
+      containers:
+      - image: Value defined by Kustomize ❤️
+        name: nn
+        ports:
+        - containerPort: 8081
+          name: http

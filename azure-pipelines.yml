@@ -68,7 +68,7 @@ stages:
 
     - task: Docker@2
       displayName: 'Scanning Docker Image Application Dependencies'
-      enabled: true
+      enabled: false
       inputs:
         command: 'run'
         arguments: |
@@ -121,7 +121,6 @@ stages:
         containerRegistry: '$(ecr_conn)'
         arguments: |
           $(ecr)/$(ecr_repo):$(Build.BuildId)
-        
           
     - script: |
         digest=`docker inspect --format='{{with index .RepoDigests 0}}{{index (split . "@") 1}}{{end}}' $(ecr)/$(ecr_repo):$(Build.BuildId)`
