@@ -9,6 +9,7 @@ variables:
   ecr: '881986476278.dkr.ecr.us-east-2.amazonaws.com'
   ecr_repo: 'nn'
   ecr_conn: 'azure_devops_to_ecr_docker_conn'
+  aws_conn: 'azure_devops_to_ecr'
   trivy: 'aquasec/trivy:0.71.2'
   cosign: 'ghcr.io/sigstore/cosign/cosign:latest'
       
@@ -133,17 +134,14 @@ stages:
       inputs:
         secureFile: 'cosign.key'
           
-    - task: AWSShellScript@1
-      displayName: 'Run AWS CLI Commands'
+    - task: Docker@2
+      displayName: 'Siging Image'
       inputs:
-        awsCredentials: 'azure_devops_to_ecr'  
-        regionName: 'us-east-2'
-        scriptType: 'inline'
-        inlineScript: |
-          curl -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" -o cosign
-          chmod +x cosign
-          mv cosign /usr/local/bin/cosign
-    
-          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
-    
-          COSIGN_PASSWORD='' cosign sign --key $(cosignKey.secureFilePath) $(ecr)/$(ecr_repo)@$(digest)
+        command: 'run'
+        containerRegistry: '$(ecr_conn)'
+        arguments: |
+          -v /var/run/docker.sock:/var/run/docker.sock
+          -e COSIGN_PASSWORD=''
+          sigstore/cosign cosign sign 
+          --key $(cosignKey.secureFilePath)
+          $(ecr)/$(ecr_repo)@$(digest)

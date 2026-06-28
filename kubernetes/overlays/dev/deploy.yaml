@@ -10,7 +10,7 @@ spec:
     spec:
       containers:             
       - name: nn
-        image: nginx:1.15.2       
+        image: 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:__IMAGE_TAG__       
         resources:
           requests:
             memory: "16Mi"
