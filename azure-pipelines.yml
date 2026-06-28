@@ -89,7 +89,7 @@ stages:
           $(trivy) fs /src
           --severity CRITICAL
           --exit-code 1
-      continueOnError: flase       
+      continueOnError: false       
           
 - stage: Push
   displayName: 'Push'
