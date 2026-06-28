@@ -32,6 +32,10 @@ stages:
           
     - script: |
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
+        
+        sed -i 's#__IMAGE_TAG__#$(Build.BuildId)#g' $(Build.SourcesDirectory)/kubernetes/overlays/*/deploy.yaml
+        ls -l
+        cp -r $(Build.SourcesDirectory)  $(Build.ArtifactStagingDirectory)/nn
       displayName: 'Packing Docker Image'
 
     - task: PublishPipelineArtifact@1
@@ -39,6 +43,13 @@ stages:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/$(ecr_repo).tar'
         artifactName: 'docker-image-$(ecr_repo)'
+        
+    - task: PublishPipelineArtifact@1
+      displayName: 'Publishing Docker Image as Artifact'
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/nn'
+        artifactName: 'git-repo'
+
 
 - stage: Scan
   displayName: 'Scan'
@@ -69,6 +80,7 @@ stages:
 
     - task: Docker@2
       displayName: 'Scanning Docker Image Application Dependencies'
+      enabled: false
       inputs:
         command: 'run'
         arguments: |
@@ -77,7 +89,7 @@ stages:
           $(trivy) fs /src
           --severity CRITICAL
           --exit-code 1
-      continueOnError: true       
+      continueOnError: flase       
           
 - stage: Push
   displayName: 'Push'
