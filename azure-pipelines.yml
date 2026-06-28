@@ -69,7 +69,6 @@ stages:
 
     - task: Docker@2
       displayName: 'Scanning Docker Image Application Dependencies'
-      enabled: false
       inputs:
         command: 'run'
         arguments: |
@@ -78,7 +77,7 @@ stages:
           $(trivy) fs /src
           --severity CRITICAL
           --exit-code 1
-      continueOnError: false       
+      continueOnError: true       
           
 - stage: Push
   displayName: 'Push'
@@ -134,14 +133,17 @@ stages:
       inputs:
         secureFile: 'cosign.key'
           
-    - task: Docker@2
-      displayName: 'Siging Image'
+    - task: AWSShellScript@1
+      displayName: 'Run AWS CLI Commands'
       inputs:
-        command: 'run'
-        containerRegistry: '$(ecr_conn)'
-        arguments: |
-          -v /var/run/docker.sock:/var/run/docker.sock
-          -e COSIGN_PASSWORD=''
-          sigstore/cosign cosign sign 
-          --key $(cosignKey.secureFilePath)
-          $(ecr)/$(ecr_repo)@$(digest)
+        awsCredentials: $(aws_conn)
+        regionName: 'us-east-2'
+        scriptType: 'inline'
+        inlineScript: |
+          curl -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" -o cosign
+          chmod +x cosign
+          mv cosign /usr/local/bin/cosign
+    
+          aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin $(ecr)
+    
+          COSIGN_PASSWORD='' cosign sign --key $(cosignKey.secureFilePath) $(ecr)/$(ecr_repo)@$(digest)
