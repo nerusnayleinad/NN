@@ -13,8 +13,8 @@ spec:
         image: 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:__IMAGE_TAG__       
         resources:
           requests:
-            memory: "16Mi"
+            memory: "128Mi"
             cpu: "0.1"
           limits:
-            memory: "32Mi"
+            memory: "256Mi"
             cpu: "0.2" 
