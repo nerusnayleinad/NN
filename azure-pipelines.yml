@@ -34,7 +34,6 @@ stages:
         docker save $(ecr)/$(ecr_repo):$(Build.BuildId) -o $(Build.ArtifactStagingDirectory)/$(ecr_repo).tar
         
         sed -i 's#__IMAGE_TAG__#$(Build.BuildId)#g' $(Build.SourcesDirectory)/kubernetes/overlays/*/deploy.yaml
-        ls -l
         cp -r $(Build.SourcesDirectory)  $(Build.ArtifactStagingDirectory)/nn
       displayName: 'Packing Docker Image'
 
