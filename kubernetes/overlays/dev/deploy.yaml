@@ -7,14 +7,15 @@ spec:
     metadata:
       labels:
         version: v1
+        env: dev
     spec:
       containers:             
       - name: nn
         image: 881986476278.dkr.ecr.us-east-2.amazonaws.com/nn:__IMAGE_TAG__       
         resources:
           requests:
-            memory: "128Mi"
+            memory: "256Mi"
             cpu: "0.1"
           limits:
-            memory: "256Mi"
+            memory: "512Mi"
             cpu: "0.2" 

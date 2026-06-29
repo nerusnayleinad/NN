@@ -7,6 +7,7 @@ spec:
     metadata:
       labels:
         version: v1
+        env: staging
     spec:
       containers:             
       - name: nn
