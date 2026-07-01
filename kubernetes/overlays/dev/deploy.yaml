@@ -5,9 +5,6 @@ metadata:
 spec:
   template:
     metadata:
-      labels:
-        version: v1
-        env: dev
     spec:
       containers:             
       - name: nn
